@@ -1,0 +1,116 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link href="static/assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <link href="static/assets/global/css/components.css" rel="stylesheet" type="text/css"/>
+        <link href="static/assets/admin/pages/css/login.css" rel="stylesheet" type="text/css"/>
+        <script src="static/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    </head>
+    <body class="login">
+        <div class="content">
+            <h3 class="form-title">创建商品</h3>
+            <div class="form-group">
+                <label class="control-label">商品名</label>
+                <div>
+                    <input class="form-control" type="text" placeholder="商品名" name="title" id="title"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">描述</label>
+                <div>
+                    <input class="form-control" type="text" placeholder="描述" name="description" id="description"/>
+                </div>
+            </div><div class="form-group">
+                <label class="control-label">价格</label>
+                <div>
+                    <input class="form-control" type="text" placeholder="价格" name="price" id="price"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">图片</label>
+                <div>
+                    <input class="form-control" type="text" placeholder="图片" name="imgUrl" id="imgUrl"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">库存</label>
+                <div>
+                    <input class="form-control" type="text" placeholder="库存" name="stock" id="stock"/>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn blue-steel" id="create" type="submit">
+                    提交创建
+                </button>
+            </div>
+        </div>
+    </body>
+    <script>
+        jQuery(document).ready(function () {
+            $("#create").on("click", function () {
+                //为什么后端做了校验, 前端还要做呢? 因为校验要在最贴近用户感知的地方, 而不用从后端绕一圈, 感知更强体验更好
+                var title = $("#title").val();
+                var description = $("#description").val();
+                var price = $("#price").val();
+                var imgUrl = $("#imgUrl").val();
+                var stock = $("#stock").val();
+                if (title == null || title === "") {
+                    alert("商品名不能为空");
+                    return false;
+                }
+                if (description == null || description === "") {
+                    alert("描述不能为空");
+                    return false;
+                }
+                if (price == null || price === "") {
+                    alert("价格不能为空");
+                    return false;
+                }
+                if (imgUrl == null || imgUrl === "") {
+                    alert("图片不能为空");
+                    return false;
+                }
+                if (stock == null || stock === "") {
+                    alert("库存不能为空");
+                    return false;
+                }
+                /**
+                 imooc 慕课网 SpringBoot构建电商基础秒杀项目
+                 3-11 解bug总结 ①inSessionOtpCode==null ②注册失败user_id 为空 ③注册失败 404
+                 1 inSessionOtpCode 一直是 null  (我是漏了register.html)
+                 解决方案: ① 前端 register.html 和 getotp.html 都添加 xhrFields:{withCredentials:true}, ② 后端 UserController添加 @CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
+                 记得 重启程序, 还不行可 FIle -> invalidate Cache/ Restart
+                 2 注册失败1: user_id 为空,
+                 解决方案: 看视频可知, <insert id=insertSelect 里添加: keyProperty="id" useGeneratedKeys="true" 实现id回填再 --> UserServiceImpl.register()中 合适位置 添加 userModel.setId(userDO.getId());
+                 重启程序
+                 3 注册失败2: `注册失败, 原因为........`  总之是404, 是register() 忘了添加     @ResponseBody
+                 */
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/x-www-form-urlencoded",
+                    url: "http://1.116.237.91:8090/item/create",
+                    data: {
+                        "title": title,
+                        "description": description,
+                        "price": price,
+                        "imgUrl": imgUrl,
+                        "stock": stock,
+                    },
+                    //xhrFields 允许ajax跨域请求 授信, 与后端 ALLOW_CREDENTIALS, 遥相呼应
+                    xhrFields:{withCredentials:true},
+                    success: function (data) {
+                        if (data.status === "success") {
+                            alert("创建成功");
+                        } else {
+                            alert("创建失败, 原因为" + data.data.errMsg);
+                        }
+                    },
+                    error: function (data) {
+                        alert("创建失败, 原因为" + data.responseText);
+                    }
+                });
+                return false;
+            })
+        });
+    </script>
+</html>
